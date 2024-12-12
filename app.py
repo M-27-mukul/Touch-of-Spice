@@ -108,6 +108,14 @@ def describe(recipe_id):
     }
     return render_template("describe recipe.html", recipe=recipe)
 
+# Cart Page
+@app.route("/cart")
+def cart():
+    if session.get('user_id'):
+        return render_template("cart.html")
+    else:
+        return redirect(url_for("login"))
+
 # Contact Page
 @app.route("/contact")
 def contact():
