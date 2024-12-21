@@ -108,11 +108,82 @@ def describe(recipe_id):
     }
     return render_template("describe recipe.html", recipe=recipe)
 
+
+# # Add Cart Action
+@app.route("/add-to-cart/<int:recipe_id>")
+def add_to_cart(recipe_id):
+    if session.get('user_id'):
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM users WHERE id = "+ str(session["user_id"])
+        cursor.execute(query)
+        user = cursor.fetchone()
+        if not user:
+            logout()
+        else:
+            query = "SELECT * FROM recipes WHERE id = "+ str(recipe_id)
+            cursor.execute(query)
+            recipe_item = cursor.fetchone()
+            if not recipe_item:
+                return redirect(url_for("search"))
+            else:
+                query = "SELECT * FROM cart WHERE user_id = "+ str(session["user_id"])
+                cursor.execute(query)
+                user = cursor.fetchone()
+                if not user:
+                    cursor.execute("Insert into cart (user_id, items) Values (%s, %s)", (str(session["user_id"]), recipe_item["ingredients"]))
+                    conn.commit()
+                else:
+                    items = json.loads(user["items"])
+                    new_items = json.loads(recipe_item["ingredients"])
+                    # Create a dictionary to sum quantities
+                    data = {}
+
+                    # Process the first list
+                    for item in items:
+                        data[item['id']] = data.get(item['id'], 0) + int(item['quantity'])
+
+                    # Process the second list
+                    for item in new_items:
+                        data[item['id']] = data.get(item['id'], 0) + int(item['quantity'])
+
+                    # Convert the result back to list of dictionaries
+                    items = [{"id": k, "quantity": v} for k, v in data.items()]
+                    
+                    items = json.dumps(items)
+                    
+                    cursor.execute("Update cart set items=%s where user_id=%s", (items, str(session["user_id"])))
+                    conn.commit()          
+        cursor.close()
+        conn.close()
+        return redirect(url_for("describe", recipe_id=recipe_id))
+    else:
+        return redirect(url_for("login"))
+
 # Cart Page
 @app.route("/cart")
 def cart():
     if session.get('user_id'):
-        return render_template("cart.html")
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM cart WHERE user_id = "+ str(session["user_id"])
+        cursor.execute(query)
+        user = cursor.fetchone()
+        if not user:
+            return render_template("cart.html", data= None)
+        else:
+            items = json.loads(user["items"])
+            # Create a dictionary to sum quantities
+            data = {}
+
+            # Process the first list
+            for item in items:
+                data[item['id']] = data.get(item['id'], 0) + int(item['quantity'])
+            query = "SELECT id, ingredient_name, price FROM ingredients WHERE id in "+ str(tuple(data.keys()))
+            cursor.execute(query)
+            item_details = cursor.fetchall()
+            return render_template("cart.html", data=data, item_details= item_details)
+            
     else:
         return redirect(url_for("login"))
 

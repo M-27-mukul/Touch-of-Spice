@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Your Cart</title>
+
+</head>
+<body>
+    <!--{% set total_price = 0 %}-->
+    {% if data%}
+    
+    {%for item in item_details%}
+    <p>{{item.ingredient_name}} with qty {{data[item.id]}} with rate {{item.price}} and total price is  {{data[item.id]*item.price}}</p>
+    <!--{% set total_price = total_price+(data[item.id]*item.price) %}-->
+    {%endfor%}
+    <p>Account check kro Rs.9999 hai bhi ya saukhiya cart me add kiye ja rhe ho
+    {%else%}
+    <h1>Jb kuch add nhi kiya, to dikhega kaise?</h1>
+    <p>jao pehle add kro, is <a href="{{url_for('search')}}">link</a> ka prayoga krke </p>
+    {%endif%}
+
+</body>
+</html>

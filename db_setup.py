@@ -37,27 +37,24 @@ cursor = conn.cursor()
 # """)
 
 # # Users table
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(60) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-)
-""")
-
-# # Cart table
 # cursor.execute("""
-# CREATE TABLE IF NOT EXISTS cart (
+# CREATE TABLE IF NOT EXISTS users (
 #     id INT AUTO_INCREMENT PRIMARY KEY,
-#     user_id INT,
-#     recipe_id INT,
-#     quantity INT DEFAULT 1,
-#     FOREIGN KEY (user_id) REFERENCES users(id),
-#     FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+#     name VARCHAR(50) NOT NULL,
+#     email VARCHAR(60) NOT NULL UNIQUE,
+#     password VARCHAR(255) NOT NULL
 # )
 # """)
 
+# # Cart table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS cart (
+    user_id INT unique,
+    items TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+)
+""")
+
 print("Database and tables created successfully.")
 cursor.close()
-conn.close()
+conn.close() 
