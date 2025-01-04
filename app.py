@@ -192,9 +192,14 @@ def cart():
 def contact():
     return render_template("contact.html")
 
+# Checkout  Page
+@app.route("/checkout")
+def checkout():
+    return render_template("checkout.html")
+
 # Profile Page
 @app.route("/profile")
-def profile():
+def profile():  
     if session.get('user_id'):
         return render_template("profile.html")
     else:
